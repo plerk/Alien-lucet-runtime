@@ -1,0 +1,40 @@
+use alienfile;
+
+sub probe { 'share' }
+
+share {
+
+  requires 'Alien::git';
+
+  download [
+    '%{git} clone --depth 1 https://github.com/fastly/lucet.git .',
+    '%{git} submodule init',
+    '%{git} submodule update',
+  ];
+
+  extract [
+    'cp -r %{.install.download} .',
+  ];
+
+  build [
+    'make -C lucet-runtime',
+    'mkdir -p %{.install.prefix}/lib',
+    'cp target/debug/liblucet_runtime.* %{.install.prefix}/lib',
+    'cp -r lucet-runtime/include %{.install.prefix}/include',
+  ];
+
+  plugin 'Gather::IsolateDynamic';
+
+  gather sub {
+    my($build) = @_;
+    my $prefix = $build->runtime_prop->{prefix};
+    my $download = $build->install_prop->{download};
+    my $version = `git -C $download rev-parse HEAD`;
+    chomp $version;
+    $build->runtime_prop->{version}     = $version;
+    $build->runtime_prop->{cflags}      = "-I$prefix/include";
+    $build->runtime_prop->{libs}        = "-L$prefix/lib -llucet_runtime";
+    $build->runtime_prop->{libs_static} = "-L$prefix/lib -llucet_runtime -lrt";
+  };
+
+};
