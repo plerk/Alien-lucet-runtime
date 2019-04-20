@@ -1,6 +1,6 @@
 use alienfile;
 
-sub probe { 'share' }
+probe sub { 'share' };
 
 share {
 
@@ -13,14 +13,16 @@ share {
   ];
 
   extract [
-    'cp -r %{.install.download} .',
+    'cp -r %{.install.download} lucet',
   ];
 
   build [
-    'make -C lucet-runtime',
-    'mkdir -p %{.install.prefix}/lib',
-    'cp target/debug/liblucet_runtime.* %{.install.prefix}/lib',
-    'cp -r lucet-runtime/include %{.install.prefix}/include',
+    'make -C lucet-runtime release',
+    'sh -c \'cd lucet-wasi ; cargo build --release\'',
+    'mkdir -p %{.install.prefix}/lib %{.install.prefix}/include',
+    'cp target/release/lib* %{.install.prefix}/lib',
+    'cp -r lucet-runtime/include/* %{.install.prefix}/include',
+    'cp -r lucet-wasi/include/* %{.install.prefix}/include',
   ];
 
   plugin 'Gather::IsolateDynamic';
@@ -33,8 +35,8 @@ share {
     chomp $version;
     $build->runtime_prop->{version}     = $version;
     $build->runtime_prop->{cflags}      = "-I$prefix/include";
-    $build->runtime_prop->{libs}        = "-L$prefix/lib -llucet_runtime";
-    $build->runtime_prop->{libs_static} = "-L$prefix/lib -llucet_runtime -lrt";
+    $build->runtime_prop->{libs}        = "-L$prefix/lib -llucet_runtime -llucet_wasi";
+    $build->runtime_prop->{libs_static} = "-L$prefix/lib -llucet_runtime -llucet_wasi -lrt";
   };
 
 };
