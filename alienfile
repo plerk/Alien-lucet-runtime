@@ -1,6 +1,32 @@
 use alienfile;
+use FFI::CheckLib   ();
+use Devel::CheckLib ();
+use File::Which qw( which );
 
-sub probe { 'share' }
+configure {
+  requires 'FFI::CheckLib';
+  requires 'Devel::CheckLib';
+  requires 'File::Which';
+};
+
+probe sub {
+
+  if(Devel::CheckLib::check_lib( lib => 'lucet_runtime' )
+  && FFI::CheckLib::find_lib( lib => 'lucet_runtime' ) )
+  {
+    return 'system';
+  }
+  elsif(which('cargo') && which('rustc'))
+  {
+    return 'share';
+  }
+  else
+  {
+    print "Requires with system lucet-runtime or rust compiler";
+    exit 0;
+  }
+
+};
 
 share {
 
@@ -37,6 +63,19 @@ share {
     $build->runtime_prop->{cflags}      = "-I$prefix/include";
     $build->runtime_prop->{libs}        = "-L$prefix/lib -llucet_runtime";
     $build->runtime_prop->{libs_static} = "-L$prefix/lib -llucet_runtime -lrt";
+  };
+
+};
+
+sys {
+
+  gather sub {
+    my($build) = @_;
+    $build->runtime_prop->{version}     = 'unknown';
+    $build->runtime_prop->{ffi_name}    = "lucet_runtime";
+    $build->runtime_prop->{cflags}      = "";
+    $build->runtime_prop->{libs}        = "-llucet_runtime";
+    $build->runtime_prop->{libs_static} = "-llucet_runtime -lrt";
   };
 
 };

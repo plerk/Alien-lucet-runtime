@@ -2,16 +2,40 @@
 
 set -ex
 
+if [ "x$CIP_ENV" == "x" ]; then
+  echo "please set CIP_ENV to one of:"
+  echo " export CIP_ENV=ALIEN_INSTALL_TYPE=share"
+  echo " export CIP_ENV=ALIEN_INSTALL_TYPE=system"
+  false
+fi
+
 cip sudo apt-get update
-cip sudo apt-get -y install git libffi-dev
 
-cip exec bash -c '
-  set -ex                                                   ;
-  export TMPDIR=/home/cip/tmp                               ;
-  mkdir -p $TMPDIR                                          ;
-  curl https://sh.rustup.rs -sSf > $TMPDIR/rustup-init.sh   ;
-  chmod +x $TMPDIR/rustup-init.sh                           ;
-  $TMPDIR/rustup-init.sh --no-modify-path -v -y             ;
-'
+if echo $CIP_ENV | grep -q system; then
 
+  cip sudo apt-get -y install libffi-dev
+
+  cip sudo bash -c '
+    set -ex                                                                  ;
+    cd /                                                                     ;
+    curl https://dist.wdlabs.com/ab/lucet-runtime.tar.gz | tar zxvf -        ;
+    chmod -R go+r+X /usr/local
+  '
+
+else
+
+  cip sudo apt-get -y install git libffi-dev
+
+  cip exec bash -c '
+    set -ex                                                   ;
+    export TMPDIR=/home/cip/tmp                               ;
+    mkdir -p $TMPDIR                                          ;
+    curl https://sh.rustup.rs -sSf > $TMPDIR/rustup-init.sh   ;
+    chmod +x $TMPDIR/rustup-init.sh                           ;
+    $TMPDIR/rustup-init.sh --no-modify-path -v -y             ;
+  '
+
+fi
+
+cip exec dzil-cpanm -n Devel::CheckLib File::Which
 cip exec cpanm -n FFI::Platypus
