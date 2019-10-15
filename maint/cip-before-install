@@ -5,11 +5,13 @@ set -ex
 cip sudo apt-get update
 cip sudo apt-get -y install git libffi-dev
 
-cip exec bash -c "
-  set -ex                                              ;
-  curl https://sh.rustup.rs -sSf > /tmp/rustup-init.sh ;
-  chmod +x /tmp/rustup-init.sh                         ;
-  /tmp/rustup-init.sh --no-modify-path -v -y           ;
-"
+cip exec bash -c '
+  set -ex                                                   ;
+  export TMPDIR=/home/cip/tmp                               ;
+  mkdir -p $TMPDIR                                          ;
+  curl https://sh.rustup.rs -sSf > $TMPDIR/rustup-init.sh   ;
+  chmod +x $TMPDIR/rustup-init.sh                           ;
+  $TMPDIR/rustup-init.sh --no-modify-path -v -y             ;
+'
 
 cip exec cpanm -n FFI::Platypus

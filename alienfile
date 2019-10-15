@@ -17,9 +17,11 @@ share {
   ];
 
   build [
-    'make -C lucet-runtime',
+    'cd lucet-runtime',
+    'cargo build --release',
+    'cd ..',
     'mkdir -p %{.install.prefix}/lib',
-    'cp target/debug/liblucet_runtime.* %{.install.prefix}/lib',
+    'cp target/release/liblucet_runtime.* %{.install.prefix}/lib',
     'cp -r lucet-runtime/include %{.install.prefix}/include',
   ];
 
