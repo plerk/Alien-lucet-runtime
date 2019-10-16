@@ -19,7 +19,8 @@ if echo $CIP_ENV | grep -q system; then
     set -ex                                                                  ;
     cd /                                                                     ;
     curl https://dist.wdlabs.com/ab/lucet-runtime.tar.gz | tar zxvf -        ;
-    chmod -R go+r+X /usr/local
+    chmod -R go+r+X /usr/local                                               ;
+    ldconfig
   '
 
 else
@@ -32,10 +33,9 @@ else
     mkdir -p $TMPDIR                                          ;
     curl https://sh.rustup.rs -sSf > $TMPDIR/rustup-init.sh   ;
     chmod +x $TMPDIR/rustup-init.sh                           ;
-    $TMPDIR/rustup-init.sh --no-modify-path -v -y             ;
+    $TMPDIR/rustup-init.sh --no-modify-path -y                ;
   '
 
 fi
 
-cip exec dzil-cpanm -n Devel::CheckLib File::Which
 cip exec cpanm -n FFI::Platypus

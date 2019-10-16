@@ -1,7 +1,4 @@
 use alienfile;
-use FFI::CheckLib   ();
-use Devel::CheckLib ();
-use File::Which qw( which );
 
 configure {
   requires 'FFI::CheckLib';
@@ -11,12 +8,16 @@ configure {
 
 probe sub {
 
+  require FFI::CheckLib;
+  require Devel::CheckLib;
+  require File::Which;
+
   if(Devel::CheckLib::check_lib( lib => 'lucet_runtime' )
   && FFI::CheckLib::find_lib( lib => 'lucet_runtime' ) )
   {
     return 'system';
   }
-  elsif(which('cargo') && which('rustc'))
+  elsif(File::Which::which('cargo') && File::Which::which('rustc'))
   {
     return 'share';
   }
