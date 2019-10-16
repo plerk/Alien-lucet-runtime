@@ -14,27 +14,12 @@ cip sudo apt-get update
 if echo $CIP_ENV | grep -q system; then
 
   cip sudo apt-get -y install libffi-dev
-
-  cip sudo bash -c '
-    set -ex                                                                  ;
-    cd /                                                                     ;
-    curl https://dist.wdlabs.com/ab/lucet-runtime.tar.gz | tar zxvf -        ;
-    chmod -R go+r+X /usr/local                                               ;
-    ldconfig
-  '
+  cip pkg ab/lucet-runtime
 
 else
 
   cip sudo apt-get -y install git libffi-dev
-
-  cip exec bash -c '
-    set -ex                                                   ;
-    export TMPDIR=/home/cip/tmp                               ;
-    mkdir -p $TMPDIR                                          ;
-    curl https://sh.rustup.rs -sSf > $TMPDIR/rustup-init.sh   ;
-    chmod +x $TMPDIR/rustup-init.sh                           ;
-    $TMPDIR/rustup-init.sh --no-modify-path -y                ;
-  '
+  cip pkg rust
 
 fi
 
